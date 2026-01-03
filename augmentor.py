@@ -1,3 +1,9 @@
+import os
+from pathlib import Path
+import shutil
+import cv2
+import numpy as np
+
 class augmentor():
     def __init__(self,input_img_path,input_label_path,output_img_path,output_label_path):
         self.input_img_path = input_img_path
@@ -7,11 +13,48 @@ class augmentor():
 
 
 class brightnessAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,brightness_threshold):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path)
         self.brightness_threshold = brightness_threshold
+        self.times = times
+
     def action(self):
-        pass
+        label_filename_list = os.listdir(self.input_label_path)
+        img_filename_list = os.listdir(self.input_img_path)
+        
+        for filename in label_filename_list:
+            for i in range(self.times):
+                label_output_filename = "BRI_"+ f"{i}_" + filename
+                label_output_path = os.path.join(self.output_label_path , label_output_filename)
+                shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+
+        for filename in img_filename_list:
+            if filename.endswith(".jpg"):
+                img = cv2.imread(os.path.join(self.input_img_path,filename))
+                for i in range(self.times):
+                    brightness_factor = np.random.randint(10,self.brightness_threshold)
+                    augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_factor)
+                    img_output_filename = "BRI_" + f"{i}_" + filename
+                    img_output_path = os.path.join(self.output_img_path,img_output_filename)
+                    cv2.imwrite(img_output_path,augmented_image)
+                    
+        for filename in label_filename_list:
+            for i in range(self.times):
+                label_output_filename = "BRD_"+ f"{i}_" + filename
+                label_output_path = os.path.join(self.output_label_path , label_output_filename)
+                shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+        
+        for filename in img_filename_list:
+            if filename.endswith(".jpg"):
+                img = cv2.imread(os.path.join(self.input_img_path,filename))
+                for i in range(self.times):
+                    brightness_factor = np.random.randint(-1 * self.brightness_threshold , -10)
+                    augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_factor)
+                    img_output_filename = "BRD_" + f"{i}_" + filename
+                    img_output_path = os.path.join(self.output_img_path,img_output_filename)
+                    cv2.imwrite(img_output_path,augmented_image)
+        
+
 
 
 class contrastAugmentor(augmentor):
