@@ -118,14 +118,7 @@ class contrastDecreasedAugmentor(augmentor):
                     img_output_filename = "CND_" + f"{i}_" + filename
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,augmented_image)
-        
-
-class flippedAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path):
-        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path)
-    def action(self):
-        pass
-
+    
 class saturationIncreasedAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,saturation_threshold):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path,times)
@@ -199,7 +192,7 @@ class salt_and_pepperAugmentor(augmentor):
         for filename in label_filename_list:
             if filename.endswith(".txt"):
                 for i in range(self.times):
-                    label_output_filename = "SPD_"+ f"{i}_" + filename
+                    label_output_filename = "SP_"+ f"{i}_" + filename
                     label_output_path = os.path.join(self.output_label_path , label_output_filename)
                     shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
         
@@ -220,3 +213,54 @@ class salt_and_pepperAugmentor(augmentor):
                     img_output_filename = "SP_" + f"{i}_" + filename
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,noisy_image)
+
+class blurAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times,ksize):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+        self.ksize = ksize
+
+    def action(self):
+        label_filename_list = os.listdir(self.input_label_path)
+        img_filename_list = os.listdir(self.input_img_path)
+        for filename in label_filename_list:
+            if filename.endswith(".txt"):
+                for i in range(self.times):
+                    label_output_filename = "BLR_"+ f"{i}_" + filename
+                    label_output_path = os.path.join(self.output_label_path , label_output_filename)
+                    shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+        for filename in img_filename_list:
+            if filename.endswith(".jpg"):
+                img = cv2.imread(os.path.join(self.input_img_path,filename))
+                for i in range(self.times):
+                    img_copy = img.copy()
+                    img_copy = cv2.blur(img_copy,(self.ksize,self.ksize))
+                    img_output_filename = "BLR_" + f"{i}_" + filename
+                    img_output_path = os.path.join(self.output_img_path,img_output_filename)
+                    cv2.imwrite(img_output_path,img_copy)
+
+
+class shakeBlurAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+class shadowAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+class sunlightAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+class flippedAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path)
+    def action(self):
+        pass
+
+class rotateAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+class hueAugmentor (augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
