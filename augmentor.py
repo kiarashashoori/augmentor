@@ -13,7 +13,6 @@ class augmentor():
         self.output_label_path = output_label_path
         self.times = times
 
-
 class brightnessIncreasedAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path,times)
@@ -39,9 +38,7 @@ class brightnessIncreasedAugmentor(augmentor):
                     img_output_filename = "BRI_" + f"{i}_" + filename
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,augmented_image)
-
-        
-        
+           
 class brightnessDecreasedAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path,times)
@@ -66,7 +63,6 @@ class brightnessDecreasedAugmentor(augmentor):
                     img_output_filename = "BRD_" + f"{i}_" + filename
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,augmented_image)
-
 
 class contrastIncreasedAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,contrast_threshold):
@@ -181,7 +177,6 @@ class saturationDecreasedAugmentor(augmentor):
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,augmented_image)
 
-
 class salt_and_pepperAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times,noise_max):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
@@ -238,11 +233,14 @@ class blurAugmentor(augmentor):
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,img_copy)
 
-
-class shakeBlurAugmentor(augmentor):
+class shakeVerticalBlurAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
 
+class shakeHorizentalBlurAugmentor(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+        
 class shadowAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
