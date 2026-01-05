@@ -38,43 +38,6 @@ class app(App):
         screen_layout.add_widget(confirm_layout)
         screen_layout.add_widget(checkbox_layout)
         return screen_layout
-        # return confirm_layout
-        # check_box_layout = []
-        # check_box_rows_layout = []
-        # for _ in range(3):
-        #     check_box_layout.append(BoxLayout(orientation = 'horizontal'))
-        # for _ in range(5):
-        #     check_box_rows_layout.append(BoxLayout(orientation = 'vertical'))
-        # y = 500
-        # x = 100
-        # for i in range(len(options)):
-        #     lbl = Label(text=options[i], pos=(x, y))
-        #     self.add_widget(lbl)
-        #     chk = CheckBox(pos=(x + 85, y), active=False)
-        #     self.add_widget(chk)
-        #     if ((i+1) % 3 == 0):
-        #         x = 100
-        #         y -= 50
-        #     else:
-        #         x += 220
-        # for i in range(len(options)):
-        #     lbl = Label(text=options[i])
-        #     chk = CheckBox(active=False)
-        #     print (i // 3)
-        #     if ((i+1) % 3 == 0):
-        #         check_box_layout[i%3].add_widget(lbl)
-        #         check_box_layout[i%3].add_widget(chk)
-        #         for a in range(3):
-        #             check_box_rows_layout[i // 3].add_widget(check_box_layout[a])
-                
-        #     else :
-        #         check_box_layout[i%3].add_widget(lbl)
-        #         check_box_layout[i%3].add_widget(chk)
-        # for i in range(5):
-
-        #     screen_layout.add_widget(check_box_rows_layout[i])
-        
-        # return screen_layout
 
 if __name__ == '__main__':
     root = app()
