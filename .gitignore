@@ -1,3 +1,4 @@
 augmentor_env/
 test.py
+__pycache__/
 
