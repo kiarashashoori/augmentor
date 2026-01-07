@@ -16,55 +16,6 @@ from kivy.core.window import Window
 import parameters
 
 import os
-
-class app(App):
-    def on_start(self):
-        Window.size = (1100, 600)
-        Window.minimum_width = 800
-        Window.minimum_height = 600
-
-    def build(self):
-        options = ['increase brightness', 'decrease brightness' ,'increase contrast',
-                   'decrease contrast','decrease saturation' , 'increase saturation' ,
-                   'salt&pepper', 'blur', 'vertical motion blur', 'horizental motion blur',
-                   'shadow', 'sunlight', 'rotate' , 'flipped' , 'hue']
-
-        checkbox_layout = StackLayout(orientation ='lr-tb')
-        for i in range(len(options)):
-            lbl = Label(text=options[i],size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos_hint = (None,None))
-            chk = CheckBox(active=False,size_hint = (None,None),pos_hint = (None,None))
-            chk.id = options[i]
-            chk.bind(active = self.checkbox_is_active)
-            checkbox_layout.add_widget(lbl)
-            checkbox_layout.add_widget(chk)
-
-
-
-        
-        confirm_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
-        confirm_btn = Button(text='start',size_hint = (None,None),size = ("75dp","40dp"),on_press = self.clicked,
-                             background_normal='',background_color=(0,0.8,0.3,1))
-        confirm_layout.add_widget(confirm_btn)
-
-        image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
-        auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
-        image_layout.add_widget(auriga_image)
-
-        screen_layout = FloatLayout()
-        screen_layout.add_widget(confirm_layout)
-        screen_layout.add_widget(checkbox_layout)
-        screen_layout.add_widget(image_layout)
-        return screen_layout
-    
-    def checkbox_is_active(self,checkbox,value):
-        if value :
-            parameters.active_checkboxs.append(checkbox.id)
-        else :
-            parameters.active_checkboxs.remove(checkbox.id)
-    
-    def clicked(self,instance):
-        print(parameters.active_checkboxs)
-
     
 tb_values = parameters.path_values
 class PathBrowserApp(App):
@@ -157,7 +108,7 @@ class PathBrowserApp(App):
             
             if flag == True:
                 self.stop()
-                app().run()
+                augmentSelectorApp().run()
             else:
                 pass
 
@@ -225,7 +176,73 @@ class PathBrowserApp(App):
         if hasattr(self, 'popup'):
             self.popup.dismiss()
 
+class augmentSelectorApp(App):
+    def on_start(self):
+        Window.size = (1100, 600)
+        Window.minimum_width = 800
+        Window.minimum_height = 600
+
+    def build(self):
+        options = ['increase brightness', 'decrease brightness' ,'increase contrast',
+                   'decrease contrast','decrease saturation' , 'increase saturation' ,
+                   'salt&pepper', 'blur', 'vertical motion blur', 'horizental motion blur',
+                   'shadow', 'sunlight', 'rotate' , 'flipped' , 'hue']
+
+        checkbox_layout = StackLayout(orientation ='lr-tb')
+        for i in range(len(options)):
+            lbl = Label(text=options[i],size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos_hint = (None,None))
+            chk = CheckBox(active=False,size_hint = (None,None),pos_hint = (None,None))
+            chk.id = options[i]
+            chk.bind(active = self.checkbox_is_active)
+            checkbox_layout.add_widget(lbl)
+            checkbox_layout.add_widget(chk)
+
+
+
+        
+        confirm_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
+        confirm_btn = Button(text='start',size_hint = (None,None),size = ("75dp","40dp"),on_press = self.clicked,
+                             background_normal='',background_color=(0,0.8,0.3,1))
+        confirm_layout.add_widget(confirm_btn)
+
+        image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
+        auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
+        image_layout.add_widget(auriga_image)
+
+        screen_layout = FloatLayout()
+        screen_layout.add_widget(confirm_layout)
+        screen_layout.add_widget(checkbox_layout)
+        screen_layout.add_widget(image_layout)
+        return screen_layout
+    
+    def checkbox_is_active(self,checkbox,value):
+        if value :
+            parameters.active_checkboxs.append(checkbox.id)
+        else :
+            parameters.active_checkboxs.remove(checkbox.id)
+    
+    def clicked(self,instance):
+        # print(parameters.active_checkboxs)
+        if (len(parameters.active_checkboxs) >0):
+            self.stop()
+            augmentViewerApp().run()
+        else:
+            popup_layout = BoxLayout(orientation='vertical', spacing=10)
+            lbl = Label(text='you dont select any augment type')
+            popup_layout.add_widget(lbl)
+            self.popup = Popup(
+            title=f"Error",
+            content=popup_layout,
+            size_hint=(0.7, 0.7),  # Relative to window size
+            auto_dismiss=True  # Don't close when clicking outside
+            )
+            self.popup.open()
+            
+
+class augmentViewerApp(App):
+    def build(self):
+        pass
 if __name__ == '__main__':
-    root = app()
+    root = augmentSelectorApp()
     root.run()
 
