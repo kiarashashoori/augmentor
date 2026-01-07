@@ -196,7 +196,7 @@ class salt_and_pepperAugmentor(augmentor):
                 img = cv2.imread(os.path.join(self.input_img_path,filename))
                 
                 for i in range(self.times):
-                    noise = random.randint(20,self.noise_max)
+                    noise = random.randint(10,self.noise_max)
                     noisy_image = img.copy()
                     noise /= 1000
                     salt_prob = noise / 2
@@ -208,6 +208,18 @@ class salt_and_pepperAugmentor(augmentor):
                     img_output_filename = "SP_" + f"{i}_" + filename
                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
                     cv2.imwrite(img_output_path,noisy_image)
+    '''
+    def single_img_action(self,img):
+        noise = random.randint(10,self.noise_max)
+        noisy_image = img.copy()
+        noise /= 1000
+        salt_prob = noise / 2
+        pepper_prob = noise / 2
+        salt_mask = np.random.random(img.shape[:2]) < salt_prob
+        noisy_image[salt_mask] = 255
+        pepper_mask = np.random.random(img.shape[:2]) < pepper_prob
+        noisy_image[pepper_mask] = 0
+        cv2.imwrite("cache/output_img.jpg",noisy_image)'''
 
 class blurAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times,ksize):
@@ -236,10 +248,42 @@ class blurAugmentor(augmentor):
 class shakeVerticalBlurAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+    
+    def action(self):
+        kernel_size = 25
+        img = cv2.imread('cache/input_img.jpg')
+        # Create the vertical kernel.
+        kernel_v = np.zeros((kernel_size, kernel_size))
+
+        # Fill the middle row with ones.
+        kernel_v[:, int((kernel_size - 1)/2)] = np.ones(kernel_size)
+
+        # Normalize.
+        kernel_v /= kernel_size
+
+        # Apply the vertical kernel.
+        vertical_mb = cv2.filter2D(img, -1, kernel_v)
+
+        # Save the outputs.
+        # cv2.imwrite('car_vertical.jpg', vertical_mb)
+        # cv2.imwrite('car_horizontal.jpg', horizonal_mb)
 
 class shakeHorizentalBlurAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+    
+    def action(self):
+        kernel_size = 25
+        img = cv2.imread('cache/input_img.jpg')
+        # Create the vertical kernel.
+        kernel_h = np.zeros((kernel_size, kernel_size))
+        kernel_h[int((kernel_size - 1)/2), :] = np.ones(kernel_size)
+
+        # Normalize.
+        kernel_h /= kernel_size
+
+        # Apply the horizontal kernel.
+        horizonal_mb = cv2.filter2D(img, -1, kernel_h)
         
 class shadowAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
@@ -262,3 +306,6 @@ class rotateAugmentor(augmentor):
 class hueAugmentor (augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+
+shakeVerticalBlurAugmentor('','','','',0).action()
