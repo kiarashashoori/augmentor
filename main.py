@@ -248,20 +248,26 @@ class augmentViewerApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.increase_brightness_threshold = 50
+        self.decrease_brightness_threshold = 50
+        self.increase_contrast_threshold = 30
+        self.decrease_contrast_threshold = 30
+        self.i = 0
+        possible_images = os.listdir(parameters.path_values[0])
+        self.images = []
+        
+        for image in possible_images:
+            if image.endswith(".jpg"):
+                self.images.append(image)
     def on_start(self):
         Window.size = (1200, 800)
         Window.minimum_width = 1200
         Window.minimum_height = 800
     def build(self):
+        print('hi')
         if len(parameters.active_checkboxs) <= 0:
             pass
 
-        possible_images = os.listdir(parameters.path_values[0])
-        self.images = []
-        self.i = 0
-        for image in possible_images:
-            if image.endswith(".jpg"):
-                self.images.append(image)
+        
         augmentViewerApp.create_sample(self)
         auriga_image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
         auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
@@ -270,6 +276,7 @@ class augmentViewerApp(App):
         image_layout = AnchorLayout(anchor_x='center', anchor_y='top')
         
         self.image = Image(source = "cache/output_img.jpg",size_hint = (0.8,0.6))
+        self.image.reload()
         image_layout.add_widget(self.image)
 
         right_btn_layout = AnchorLayout(anchor_x='right', anchor_y='center')
@@ -284,28 +291,32 @@ class augmentViewerApp(App):
 
         confirm_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
         confirm_btn = Button(text='confirm',size_hint = (None,None),size = ("75dp","40dp"),
-                             background_normal='',background_color=(0,0.8,0.3,1))
+                             background_normal='',background_color=(0,0.8,0.3,1),on_press = self.confirm_clicked)
         confirm_layout.add_widget(confirm_btn)
 
         threshold_layout = FloatLayout()
         self.threshold = TextInput(text = '50',size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
                                     multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        self.times = TextInput(text = '1',size_hint = (None,None),size=("50dp","30dp"),pos=(100,100),
+                                    multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
         apply_btn = Button(text='apply',size_hint = (None,None),size = ("75dp","40dp"),
                              background_normal='',background_color=(0,0.8,0.3,1),pos=(800,100),on_press = self.apply_clicked)
+        
         threshold_layout.add_widget(self.threshold)
         threshold_layout.add_widget(apply_btn)
+        threshold_layout.add_widget(self.times)
+
         
 
-        screen_layout = FloatLayout()
-        screen_layout.add_widget(auriga_image_layout)
-        screen_layout.add_widget(image_layout)
-        screen_layout.add_widget(right_btn_layout)
-        screen_layout.add_widget(left_btn_layout)
-        screen_layout.add_widget(confirm_layout)
-        screen_layout.add_widget(threshold_layout)
+        self.screen_layout = FloatLayout()
+        self.screen_layout.add_widget(auriga_image_layout)
+        self.screen_layout.add_widget(image_layout)
+        self.screen_layout.add_widget(right_btn_layout)
+        self.screen_layout.add_widget(left_btn_layout)
+        self.screen_layout.add_widget(confirm_layout)
+        self.screen_layout.add_widget(threshold_layout)
 
-
-        return screen_layout
+        return self.screen_layout
     
     def right_clicked(self,instance):
         if self.i + 1< len(self.images):
@@ -326,9 +337,34 @@ class augmentViewerApp(App):
     def apply_clicked(self,_):
         if (parameters.active_checkboxs[0] == 'increase brightness'):
             self.increase_brightness_threshold = int(self.threshold.text)
+        if (parameters.active_checkboxs[0] == 'decrease brightness'):
+            self.decrease_brightness_threshold = int(self.threshold.text)
+        if (parameters.active_checkboxs[0] == 'increase contrast'):
+            self.increase_contrast_threshold = int(self.threshold.text)
+        if (parameters.active_checkboxs[0] == 'decrease contrast'):
+            self.decrease_contrast_threshold = int(self.threshold.text)
+
         augmentViewerApp.create_sample(self)
         self.image.reload()
 
+    def confirm_clicked(self,instance):
+        if (parameters.active_checkboxs[0] == 'increase brightness'):
+            parameters.augment_process.append(('increase brightness',int(self.times.text),self.increase_brightness_threshold))
+        if (parameters.active_checkboxs[0] == 'decrease brightness'):
+            parameters.augment_process.append(('decrease brightness',int(self.times.text),self.decrease_brightness_threshold))
+        if (parameters.active_checkboxs[0] == 'increase contrast'):
+            parameters.augment_process.append(('increase contrast',int(self.times.text),self.increase_contrast_threshold))
+        if (parameters.active_checkboxs[0] == 'decrease contrast'):
+            parameters.augment_process.append(('decrease contrast',int(self.times.text),self.decrease_contrast_threshold))
+        if (len(parameters.active_checkboxs) > 1):
+            parameters.active_checkboxs.pop(0)
+            print(parameters.augment_process)
+            self.screen_layout.clear_widgets()
+            augmentViewerApp().stop()
+            augmentViewerApp().run()
+        else :
+            pass
+        
     def create_sample(self):
         image_path = os.path.join(parameters.path_values[0],self.images[self.i])
         shutil.copy2(image_path,"cache/input_img.jpg")
@@ -336,6 +372,12 @@ class augmentViewerApp(App):
         img = cv2.imread("cache/input_img.jpg")
         if (parameters.active_checkboxs[0] == 'increase brightness'):
             sample_img = augmentor.brightnessIncreasedAugmentor(img,self.increase_brightness_threshold,'sample')
+        if (parameters.active_checkboxs[0] == 'decrease brightness'):
+            sample_img = augmentor.brightnessDecreasedAugmentor(img,self.decrease_brightness_threshold,'sample')
+        if (parameters.active_checkboxs[0] == 'increase contrast'):
+            sample_img = augmentor.contrastIncreasedAugmentor(img,self.increase_contrast_threshold,'sample')
+        if (parameters.active_checkboxs[0] == 'decrease contrast'):
+            sample_img = augmentor.contrastDecreasedAugmentor(img,self.decrease_contrast_threshold,'sample')
             
         cv2.imwrite("cache/output_img.jpg",sample_img)
             
