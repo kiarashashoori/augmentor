@@ -4,40 +4,77 @@ import shutil
 import cv2
 import numpy as np
 import random
+import threading
 
 class augmentor():
-    def __init__(self,input_img_path,input_label_path,output_img_path,output_label_path,times):
+    def __init__(self,input_img_path,input_label_path,output_img_path,output_label_path,times,augment_type):
         self.input_img_path = input_img_path
         self.input_label_path = input_label_path
         self.output_img_path = output_img_path
         self.output_label_path = output_label_path
         self.times = times
+        self.augment_type = augment_type
+    
+    def action(self,brightness_threshold=50):
+        label_not_change = ['increase brightness', 'decrease brightness' ,'increase contrast',
+                   'decrease contrast','decrease saturation' , 'increase saturation' ,
+                   'salt&pepper', 'blur', 'vertical motion blur', 'horizental motion blur',
+                   'shadow', 'sunlight','hue']
+        if self.augment_type == 'increase brightness':
+            ###copy and paste the labels###
+            label_filename_list = os.listdir(self.input_label_path)
+            for filename in label_filename_list:
+                if filename.endswith(".txt"):
+                    for i in range(self.times):
+                        label_output_filename = "BRI_"+ f"{i}_" + filename
+                        label_output_path = os.path.join(self.output_label_path , label_output_filename)
+                        shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+            ###augment the image###
+            img_filename_list = os.listdir(self.input_img_path)
+            for filename in img_filename_list:
+                if filename.endswith(".jpg"):
+                    img = cv2.imread(os.path.join(self.input_img_path,filename))
+                    for i in range(self.times):
+                        img_output_filename = "BRI_" + f"{i}_" + filename
+                        img_output_path = os.path.join(self.output_img_path,img_output_filename)
+                        augmented_image = augmentor.brightnessIncreasedAugmentor(self,img,brightness_threshold)
+                        cv2.imwrite(img_output_path,augmented_image)
+                
 
-class brightnessIncreasedAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
-        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path,times)
-        self.brightness_threshold = brightness_threshold
-
-    def action(self):
-        label_filename_list = os.listdir(self.input_label_path)
-        img_filename_list = os.listdir(self.input_img_path)
+    def brightnessIncreasedAugmentor(img,brightness_threshold,mode):
+        if mode == 'augment':
+            brightness_factor = np.random.randint(10,brightness_threshold)
+            augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_factor)
+        elif mode == 'sample':
+            augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_threshold)
+        return augmented_image
         
-        for filename in label_filename_list:
-            if filename.endswith(".txt"):
-                for i in range(self.times):
-                    label_output_filename = "BRI_"+ f"{i}_" + filename
-                    label_output_path = os.path.join(self.output_label_path , label_output_filename)
-                    shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
 
-        for filename in img_filename_list:
-            if filename.endswith(".jpg"):
-                img = cv2.imread(os.path.join(self.input_img_path,filename))
-                for i in range(self.times):
-                    brightness_factor = np.random.randint(10,self.brightness_threshold)
-                    augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_factor)
-                    img_output_filename = "BRI_" + f"{i}_" + filename
-                    img_output_path = os.path.join(self.output_img_path,img_output_filename)
-                    cv2.imwrite(img_output_path,augmented_image)
+# class brightnessIncreasedAugmentor(augmentor):
+#     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
+#         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path,times)
+#         self.brightness_threshold = brightness_threshold
+
+#     def action(self):
+#         label_filename_list = os.listdir(self.input_label_path)
+#         img_filename_list = os.listdir(self.input_img_path)
+        
+#         for filename in label_filename_list:
+#             if filename.endswith(".txt"):
+#                 for i in range(self.times):
+#                     label_output_filename = "BRI_"+ f"{i}_" + filename
+#                     label_output_path = os.path.join(self.output_label_path , label_output_filename)
+#                     shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+
+#         for filename in img_filename_list:
+#             if filename.endswith(".jpg"):
+#                 img = cv2.imread(os.path.join(self.input_img_path,filename))
+#                 for i in range(self.times):
+#                     brightness_factor = np.random.randint(10,self.brightness_threshold)
+#                     augmented_image = cv2.convertScaleAbs(img, alpha=1, beta=brightness_factor)
+#                     img_output_filename = "BRI_" + f"{i}_" + filename
+#                     img_output_path = os.path.join(self.output_img_path,img_output_filename)
+#                     cv2.imwrite(img_output_path,augmented_image)
            
 class brightnessDecreasedAugmentor(augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path,times,brightness_threshold):
@@ -308,4 +345,8 @@ class hueAugmentor (augmentor):
         super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
 
 
-shakeVerticalBlurAugmentor('','','','',0).action()
+class augmentorTest(augmentor):
+    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
+        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+
+# augmentorTest('','','','',None)

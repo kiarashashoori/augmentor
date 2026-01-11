@@ -13,6 +13,10 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.core.window import Window
 
+import shutil
+from augmentor import augmentor
+import cv2
+
 import parameters
 
 import os
@@ -225,6 +229,7 @@ class augmentSelectorApp(App):
         # print(parameters.active_checkboxs)
         if (len(parameters.active_checkboxs) >0):
             self.stop()
+            print(parameters.active_checkboxs)
             augmentViewerApp().run()
         else:
             popup_layout = BoxLayout(orientation='vertical', spacing=10)
@@ -240,8 +245,43 @@ class augmentSelectorApp(App):
             
 
 class augmentViewerApp(App):
+    def on_start(self):
+        Window.size = (1200, 800)
+        Window.minimum_width = 1200
+        Window.minimum_height = 800
     def build(self):
-        pass
+        if len(parameters.active_checkboxs) <= 0:
+            pass
+
+        possible_images = os.listdir(parameters.path_values[0])
+        images = []
+        i = 0
+        for image in possible_images:
+            if image.endswith(".jpg"):
+                images.append(image)
+
+        image_path = os.path.join(parameters.path_values[0],images[i])
+        shutil.copy2(image_path,"cache/input_img.jpg")
+        
+        img = cv2.imread("cache/input_img.jpg")
+        if (parameters.active_checkboxs[0] == 'increase brightness'):
+            sample_img = augmentor.brightnessIncreasedAugmentor(img,50,'sample')
+            
+        cv2.imwrite("cache/output_img.jpg",sample_img)
+        auriga_image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
+        auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
+        auriga_image_layout.add_widget(auriga_image)
+        
+        image_layout = AnchorLayout(anchor_x='center', anchor_y='top')
+        
+        self.image = Image(source = "cache/output_img.jpg",size_hint = (0.8,0.6))
+        image_layout.add_widget(self.image)
+
+        screen_layout = FloatLayout()
+        screen_layout.add_widget(auriga_image_layout)
+        screen_layout.add_widget(image_layout)
+        return screen_layout
+        
 if __name__ == '__main__':
     root = augmentSelectorApp()
     root.run()
