@@ -249,8 +249,13 @@ class augmentViewerApp(App):
         super().__init__(**kwargs)
         self.increase_brightness_threshold = 50
         self.decrease_brightness_threshold = 50
+
         self.increase_contrast_threshold = 30
         self.decrease_contrast_threshold = 30
+
+        self.increase_saturation_threshold = 30
+        self.decrease_saturation_threshold = 30
+
         self.i = 0
         possible_images = os.listdir(parameters.path_values[0])
         self.images = []
@@ -339,10 +344,16 @@ class augmentViewerApp(App):
             self.increase_brightness_threshold = int(self.threshold.text)
         if (parameters.active_checkboxs[0] == 'decrease brightness'):
             self.decrease_brightness_threshold = int(self.threshold.text)
+
         if (parameters.active_checkboxs[0] == 'increase contrast'):
             self.increase_contrast_threshold = int(self.threshold.text)
         if (parameters.active_checkboxs[0] == 'decrease contrast'):
             self.decrease_contrast_threshold = int(self.threshold.text)
+        
+        if (parameters.active_checkboxs[0] == 'increase saturation'):
+            self.increase_saturation_threshold = int(self.threshold.text)
+        if (parameters.active_checkboxs[0] == 'decrease saturation'):
+            self.decrease_saturation_threshold = int(self.threshold.text)
 
         augmentViewerApp.create_sample(self)
         self.image.reload()
@@ -352,10 +363,17 @@ class augmentViewerApp(App):
             parameters.augment_process.append(('increase brightness',int(self.times.text),self.increase_brightness_threshold))
         if (parameters.active_checkboxs[0] == 'decrease brightness'):
             parameters.augment_process.append(('decrease brightness',int(self.times.text),self.decrease_brightness_threshold))
+
         if (parameters.active_checkboxs[0] == 'increase contrast'):
             parameters.augment_process.append(('increase contrast',int(self.times.text),self.increase_contrast_threshold))
         if (parameters.active_checkboxs[0] == 'decrease contrast'):
             parameters.augment_process.append(('decrease contrast',int(self.times.text),self.decrease_contrast_threshold))
+
+        if (parameters.active_checkboxs[0] == 'increase saturation'):
+            parameters.augment_process.append(('increase saturation',int(self.times.text),self.increase_saturation_threshold))
+        if (parameters.active_checkboxs[0] == 'decrease saturation'):
+            parameters.augment_process.append(('decrease saturation',int(self.times.text),self.decrease_saturation_threshold))
+
         if (len(parameters.active_checkboxs) > 1):
             parameters.active_checkboxs.pop(0)
             print(parameters.augment_process)
@@ -374,10 +392,16 @@ class augmentViewerApp(App):
             sample_img = augmentor.brightnessIncreasedAugmentor(img,self.increase_brightness_threshold,'sample')
         if (parameters.active_checkboxs[0] == 'decrease brightness'):
             sample_img = augmentor.brightnessDecreasedAugmentor(img,self.decrease_brightness_threshold,'sample')
+
         if (parameters.active_checkboxs[0] == 'increase contrast'):
             sample_img = augmentor.contrastIncreasedAugmentor(img,self.increase_contrast_threshold,'sample')
         if (parameters.active_checkboxs[0] == 'decrease contrast'):
             sample_img = augmentor.contrastDecreasedAugmentor(img,self.decrease_contrast_threshold,'sample')
+
+        if (parameters.active_checkboxs[0] == 'increase saturation'):
+            sample_img = augmentor.saturationIncreasedAugmentor(img,self.increase_saturation_threshold,'sample')
+        if (parameters.active_checkboxs[0] == 'decrease saturation'):
+            sample_img = augmentor.saturationDecreasedAugmentor(img,self.decrease_saturation_threshold,'sample')
             
         cv2.imwrite("cache/output_img.jpg",sample_img)
             
