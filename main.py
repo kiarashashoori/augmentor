@@ -245,6 +245,9 @@ class augmentSelectorApp(App):
             
 
 class augmentViewerApp(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.increase_brightness_threshold = 50
     def on_start(self):
         Window.size = (1200, 800)
         Window.minimum_width = 1200
@@ -284,15 +287,26 @@ class augmentViewerApp(App):
                              background_normal='',background_color=(0,0.8,0.3,1))
         confirm_layout.add_widget(confirm_btn)
 
+        threshold_layout = FloatLayout()
+        self.threshold = TextInput(text = '50',size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+                                    multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        apply_btn = Button(text='apply',size_hint = (None,None),size = ("75dp","40dp"),
+                             background_normal='',background_color=(0,0.8,0.3,1),pos=(800,100),on_press = self.apply_clicked)
+        threshold_layout.add_widget(self.threshold)
+        threshold_layout.add_widget(apply_btn)
+        
+
         screen_layout = FloatLayout()
         screen_layout.add_widget(auriga_image_layout)
         screen_layout.add_widget(image_layout)
         screen_layout.add_widget(right_btn_layout)
         screen_layout.add_widget(left_btn_layout)
         screen_layout.add_widget(confirm_layout)
+        screen_layout.add_widget(threshold_layout)
 
 
         return screen_layout
+    
     def right_clicked(self,instance):
         if self.i + 1< len(self.images):
             self.i += 1
@@ -300,11 +314,18 @@ class augmentViewerApp(App):
             self.i = 0
         augmentViewerApp.create_sample(self)
         self.image.reload()
+
     def left_clicked(self,instance):
         if self.i > 0:
             self.i -= 1
         else :
             self.i = len(self.images)-1
+        augmentViewerApp.create_sample(self)
+        self.image.reload()
+
+    def apply_clicked(self,_):
+        if (parameters.active_checkboxs[0] == 'increase brightness'):
+            self.increase_brightness_threshold = int(self.threshold.text)
         augmentViewerApp.create_sample(self)
         self.image.reload()
 
@@ -314,7 +335,7 @@ class augmentViewerApp(App):
         
         img = cv2.imread("cache/input_img.jpg")
         if (parameters.active_checkboxs[0] == 'increase brightness'):
-            sample_img = augmentor.brightnessIncreasedAugmentor(img,50,'sample')
+            sample_img = augmentor.brightnessIncreasedAugmentor(img,self.increase_brightness_threshold,'sample')
             
         cv2.imwrite("cache/output_img.jpg",sample_img)
             
