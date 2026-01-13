@@ -253,8 +253,8 @@ class augmentViewerApp(App):
         self.increase_contrast_threshold = 30
         self.decrease_contrast_threshold = 30
 
-        self.increase_saturation_threshold = 30
-        self.decrease_saturation_threshold = 30
+        self.increase_saturation_threshold = 25
+        self.decrease_saturation_threshold = 25
 
         self.i = 0
         possible_images = os.listdir(parameters.path_values[0])
@@ -271,7 +271,7 @@ class augmentViewerApp(App):
         print('hi')
         if len(parameters.active_checkboxs) <= 0:
             pass
-
+        
         
         augmentViewerApp.create_sample(self)
         auriga_image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
@@ -300,16 +300,28 @@ class augmentViewerApp(App):
         confirm_layout.add_widget(confirm_btn)
 
         threshold_layout = FloatLayout()
-        self.threshold = TextInput(text = '50',size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+        
+        if (parameters.active_checkboxs[0] in ['increase brightness', 'decrease brightness']):
+            self.threshold = TextInput(text = str(self.increase_brightness_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
                                     multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        if (parameters.active_checkboxs[0] in ['increase contrast', 'decrease contrast']):
+            self.threshold = TextInput(text = str(self.increase_contrast_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+                                    multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        if (parameters.active_checkboxs[0] in ['increase saturation', 'decrease saturation']):
+            self.threshold = TextInput(text = str(self.increase_saturation_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+                                    multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+
+        lbl = Label(text=parameters.active_checkboxs[0],pos=(20,100),size_hint = (None,None))
         self.times = TextInput(text = '1',size_hint = (None,None),size=("50dp","30dp"),pos=(100,100),
                                     multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
         apply_btn = Button(text='apply',size_hint = (None,None),size = ("75dp","40dp"),
                              background_normal='',background_color=(0,0.8,0.3,1),pos=(800,100),on_press = self.apply_clicked)
         
+        
         threshold_layout.add_widget(self.threshold)
         threshold_layout.add_widget(apply_btn)
         threshold_layout.add_widget(self.times)
+        threshold_layout.add_widget(lbl)
 
         
 
