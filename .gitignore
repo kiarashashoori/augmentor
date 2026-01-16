@@ -3,3 +3,5 @@ test.py
 __pycache__/
 input/
 output/
+cache/input_img.jpg
+cache/output_img.jpg
