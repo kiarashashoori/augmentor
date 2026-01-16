@@ -256,7 +256,11 @@ class augmentViewerApp(App):
         self.increase_saturation_threshold = 25
         self.decrease_saturation_threshold = 25
 
-        self.salt_pepper_saturation = 50
+        self.salt_pepper_threshold = 50
+
+        self.blur_threshold = 5
+
+        self.b = 50
 
         self.i = 0
         possible_images = os.listdir(parameters.path_values[0])
@@ -316,7 +320,10 @@ class augmentViewerApp(App):
             self.threshold = TextInput(text = str(self.increase_saturation_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
                                     multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            self.threshold = TextInput(text = str(self.salt_pepper_saturation),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+            self.threshold = TextInput(text = str(self.salt_pepper_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
+                                    multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        if (parameters.active_checkboxs[0] == 'blur'):
+            self.threshold = TextInput(text = str(self.blur_threshold),size_hint = (None,None),size=("600dp","30dp"),pos=(200,100),
                                     multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
 
         lbl = Label(text=parameters.active_checkboxs[0],pos=(20,100),size_hint = (None,None))
@@ -376,7 +383,10 @@ class augmentViewerApp(App):
             self.decrease_saturation_threshold = int(self.threshold.text)
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            self.salt_pepper_saturation = int(self.threshold.text)
+            self.salt_pepper_threshold = int(self.threshold.text)
+
+        if (parameters.active_checkboxs[0] == 'blur'):
+            self.blur_threshold = int(self.threshold.text)
 
         augmentViewerApp.create_sample(self)
         self.image.reload()
@@ -398,7 +408,10 @@ class augmentViewerApp(App):
             parameters.augment_process.append(('decrease saturation',int(self.times.text),self.decrease_saturation_threshold))
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            parameters.augment_process.append(('salt&pepper',int(self.times.text),self.salt_pepper_saturation))
+            parameters.augment_process.append(('salt&pepper',int(self.times.text),self.salt_pepper_threshold))
+        
+        if (parameters.active_checkboxs[0] == 'blur'):
+            parameters.augment_process.append(('blur',int(self.times.text),self.blur_threshold))
 
         if (len(parameters.active_checkboxs) > 1):
             parameters.active_checkboxs.pop(0)
@@ -431,7 +444,10 @@ class augmentViewerApp(App):
             sample_img = augmentor.saturationDecreasedAugmentor(img,self.decrease_saturation_threshold,'sample')
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            sample_img = augmentor.saltPepperAugmentor(img,self.salt_pepper_saturation,'sample')
+            sample_img = augmentor.saltPepperAugmentor(img,self.salt_pepper_threshold,'sample')
+        
+        if (parameters.active_checkboxs[0] == 'blur'):
+            sample_img = augmentor.blurAugmentor(img,self.blur_threshold,'sample')
             
         cv2.imwrite("cache/output_img.jpg",sample_img)
             
