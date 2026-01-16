@@ -504,6 +504,8 @@ class augmentProcessApp(App):
             thread.start()
         for thread in threads:
             thread.join()
+        if len(parameters.augment_process) != 0:
+            augmentProcessApp.augmentProcessHandler(self)
                
 if __name__ == '__main__':
     root = augmentSelectorApp()
