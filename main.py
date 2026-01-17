@@ -108,8 +108,7 @@ class dataCleanerPathBrowserApp(App):
                     flag = False
             
             if flag == True:
-                self.stop()
-                augmentSelectorApp().run()
+                self.dataCleanerProcess()
             else:
                 pass
         else :
@@ -167,6 +166,33 @@ class dataCleanerPathBrowserApp(App):
         """Close the popup"""
         if hasattr(self, 'popup'):
             self.popup.dismiss()
+
+    def dataCleanerProcess(self):
+        label_filenames = []
+        image_filenames = []
+        
+        label_path = os.listdir(parameters.data_cleaner_paths[1])
+        for filename in label_path:
+            if filename.endswith('.txt'):
+                label_filenames.append(filename[:len(filename)-4])
+        image_path = os.listdir(parameters.data_cleaner_paths[0])
+        for filename in image_path:
+            if filename.endswith('.jpg'):
+                image_filenames.append(filename[:len(filename)-4])
+        i = 1
+        for imagefile in image_filenames:
+            if imagefile in label_filenames:
+                pass
+            else:
+                path = os.path.join(parameters.data_cleaner_paths[0],imagefile)
+                path += '.jpg'
+                os.remove(path)
+            
+            print(f'{i}/{len(image_filenames)}')
+            i += 1
+        
+        self.stop()
+        appSelectorApp().run()
 
 class augmentorPathBrowserApp(App):
     def on_start(self):

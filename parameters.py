@@ -2,3 +2,4 @@
 path_values = ['/home/tensorcore/Desktop/kiarash new','/home/tensorcore/Desktop/kiarash new label','/home/tensorcore/Desktop/backup','/home/tensorcore/Desktop/backup']
 active_checkboxs = []
 augment_process = []
+data_cleaner_paths = ['','']
