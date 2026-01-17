@@ -284,7 +284,7 @@ class augmentorPathBrowserApp(App):
             
             if flag == True:
                 self.stop()
-                augmentSelectorApp().run()
+                augmentorModeSelectorApp().run()
             else:
                 pass
 
@@ -351,6 +351,54 @@ class augmentorPathBrowserApp(App):
         """Close the popup"""
         if hasattr(self, 'popup'):
             self.popup.dismiss()
+
+class augmentorModeSelectorApp(App):
+    def on_start(self):
+        Window.size = (1100, 600)
+        Window.minimum_width = 800
+        Window.minimum_height = 600
+    def build(self):
+        checkbox_layout = StackLayout(orientation ='lr-tb')
+        
+        sign_lbl = Label(text='sign',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos_hint = (None,None))
+        self.sign_chk = CheckBox(active=False,size_hint = (None,None),pos_hint = (None,None))
+        self.sign_chk.id = 'sign'
+        self.sign_chk.bind(active = self.checkbox_is_active)
+        checkbox_layout.add_widget(sign_lbl)
+        checkbox_layout.add_widget(self.sign_chk)
+
+        line_lbl = Label(text='line',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos_hint = (None,None))
+        self.line_chk = CheckBox(active=False,size_hint = (None,None),pos_hint = (None,None))
+        self.line_chk.id = 'line'
+        self.line_chk.bind(active = self.checkbox_is_active)
+        checkbox_layout.add_widget(line_lbl)
+        checkbox_layout.add_widget(self.line_chk)
+        
+        confirm_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
+        confirm_btn = Button(text='start',size_hint = (None,None),size = ("75dp","40dp"),on_press = self.clicked,
+                             background_normal='',background_color=(0,0.8,0.3,1))
+        confirm_layout.add_widget(confirm_btn)
+
+        image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
+        auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
+        image_layout.add_widget(auriga_image)
+
+        screen_layout = FloatLayout()
+        screen_layout.add_widget(confirm_layout)
+        screen_layout.add_widget(checkbox_layout)
+        screen_layout.add_widget(image_layout)
+        return screen_layout
+    def checkbox_is_active(self,checkbox,value):
+        if value :
+            if checkbox.id == 'sign' and parameters.augmentor_mode != None:
+                self.line_chk.active = False
+            if checkbox.id == 'line' and parameters.augmentor_mode != None:
+                self.sign_chk.active = False
+            parameters.augmentor_mode = checkbox.id
+    def clicked(self,_):
+        if parameters.augmentor_mode != None:
+            self.stop()
+            augmentSelectorApp().run()
 
 class augmentSelectorApp(App):
     def on_start(self):
