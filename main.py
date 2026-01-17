@@ -23,6 +23,7 @@ import parameters
 import os
     
 tb_values = parameters.path_values
+data_cleaner_paths = parameters.data_cleaner_paths
 
 class appSelectorApp(App):
     def on_start(self):
@@ -46,10 +47,126 @@ class appSelectorApp(App):
             self.stop()
             augmentorPathBrowserApp().run()
         elif instance.text == "Data cleaner":
-            pass
+            self.stop()
+            dataCleanerPathBrowserApp().run()
         elif instance.text == "Data analysis":
             pass
+class dataCleanerPathBrowserApp(App):
+    def on_start(self):
+        Window.minimum_width = 1000
+        Window.minimum_height = 600
+        Window.size = (1000, 600)
+    def build(self):
+        global data_cleaner_paths
+        img_lbl = Label(text='input image path:',size_hint = (None,None),color=(1,1,1,1),pos=(50,415))
 
+        self.img_tb = TextInput(text = data_cleaner_paths[0],size_hint = (None,None),size=("600dp","30dp"),pos=(200,450),
+                                 multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+        
+        browse_img = Button(text='browse',size_hint = (None,None),size=("100dp","20dp"),
+                                  pos=(800,455),on_press=self.btn_clicked)
+        browse_img.id = 'image'
+
+        label_lbl = Label(text='label path:',size_hint = (None,None),color=(1,1,1,1),pos=(50,315))
+
+        self.label_tb = TextInput(text = data_cleaner_paths[1],size_hint = (None,None),size=("600dp","30dp"),pos=(200,350),
+                                   multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
+
+        browse_label = Button(text='browse',size_hint = (None,None),size=("100dp","20dp")
+                                    ,pos=(800,355),on_press=self.btn_clicked)
+        browse_label.id = 'label'
+
+        lbl_layout = AnchorLayout(anchor_x='center', anchor_y='top')
+        lbl = Label(text='select your paths :',size_hint = (None,None),color=(1,1,1,1))
+        lbl_layout.add_widget(lbl)
+
+        confirm_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
+        confirm_btn = Button(text='confirm',size_hint = (None,None),size = ("75dp","40dp"),background_normal='',
+                             background_color=(0,0.8,0.3,1),on_press=self.btn_clicked)
+        confirm_layout.add_widget(confirm_btn)
+
+        image_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
+        auriga_image = Image(source = 'Auriga.png',size_hint = (None,None))
+        image_layout.add_widget(auriga_image)
+
+        floatlayout = FloatLayout()
+        floatlayout.add_widget(img_lbl)
+        floatlayout.add_widget(browse_img)
+        floatlayout.add_widget(self.img_tb)
+        floatlayout.add_widget(label_lbl)
+        floatlayout.add_widget(browse_label)
+        floatlayout.add_widget(self.label_tb)
+        floatlayout.add_widget(confirm_layout)
+        floatlayout.add_widget(image_layout)
+        floatlayout.add_widget(lbl_layout)
+        return floatlayout
+    def btn_clicked(self,instance):
+        flag = True
+        if instance.text == 'confirm':
+            for path in parameters.path_values:
+                if path == '':
+                    flag = False
+            
+            if flag == True:
+                self.stop()
+                augmentSelectorApp().run()
+            else:
+                pass
+        else :
+            popup_layout = BoxLayout(orientation='vertical', spacing=10)
+
+            file_chooser = FileChooserListView(
+                            path=os.path.expanduser('~'),  # Start at home directory
+                            dirselect=True,  # Allow folder selection
+                            # filters=['*.png', '*.jpg', '*.jpeg'],  # Optional: filter for images
+                            size_hint=(1, 0.8))
+            button_layout = BoxLayout(size_hint=(1, 0.1), spacing=10)
+        
+            # Select button
+            select_btn = Button(
+                text='Select',
+                on_press=lambda x: self.select_path(file_chooser,instance.id)
+            )
+            
+            # Cancel button
+            cancel_btn = Button(
+                text='Cancel',
+                on_press=self.close_popup
+            )
+            
+            button_layout.add_widget(select_btn)
+            button_layout.add_widget(cancel_btn)
+            popup_layout.add_widget(file_chooser)
+            popup_layout.add_widget(button_layout)
+            self.popup = Popup(
+            title=f"Select {instance.id} Path",
+            content=popup_layout,
+            size_hint=(0.9, 0.9),  # Relative to window size
+            auto_dismiss=False  # Don't close when clicking outside
+            )
+            self.popup.open()
+        
+    
+    def select_path(self, filechooser,id):
+        """Handle path selection"""
+        global data_cleaner_paths
+        if filechooser.selection:
+            if id == 'image':
+                parameters.data_cleaner_paths[0] = filechooser.selection[0]
+                data_cleaner_paths = parameters.data_cleaner_paths
+                self.img_tb.text = parameters.data_cleaner_paths[0]
+            elif id == 'label':
+                parameters.data_cleaner_paths[1] = filechooser.selection[0]
+                data_cleaner_paths = parameters.data_cleaner_paths
+                self.label_tb.text = parameters.data_cleaner_paths[1]
+            self.close_popup()
+        else:
+            print("No path selected")
+    
+    def close_popup(self, *args):
+        """Close the popup"""
+        if hasattr(self, 'popup'):
+            self.popup.dismiss()
 
 class augmentorPathBrowserApp(App):
     def on_start(self):
