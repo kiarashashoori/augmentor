@@ -1,1 +1,0 @@
-###this code will read sign's classes
