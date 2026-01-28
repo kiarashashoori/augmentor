@@ -499,6 +499,51 @@ class augmentor():
                         augmented_label += '\n'
                         augmented_label_list.append(augmented_label)
 
+            if parameters.augmentor_mode == 'line':
+                for line in label_content:
+                    augmented_label = ''
+                    initial_x_coordinates = np.array([],dtype='float32')
+                    initial_y_coordinates = np.array([],dtype='float32')
+                    line_content = line.split()
+                    for i in range(len(line_content)):
+                        if i % 2 == 0 and i != 0:
+                            initial_y_coordinates =np.append(initial_y_coordinates,float(line_content[i]))
+                        elif i % 2 == 1 and i != 0:
+                            initial_x_coordinates =np.append(initial_x_coordinates,float(line_content[i]))
+                    
+                    initial_x_coordinates = initial_x_coordinates - (size[1]//2)
+                    initial_y_coordinates = initial_y_coordinates - (size[0]//2)
+
+                    secondary_x_coordinates = (np.cos(np.radians(angle))*initial_x_coordinates)+(np.sin(np.radians(angle))*initial_y_coordinates)
+                    secondary_y_coordinates = (np.cos(np.radians(angle))*initial_y_coordinates)-(np.sin(np.radians(angle))*initial_x_coordinates)
+
+                    secondary_x_coordinates = secondary_x_coordinates + (size[1]//2)
+                    secondary_y_coordinates = secondary_y_coordinates + (size[0]//2)
+
+                    must_be_delete = []
+
+                    for i in range(len(secondary_x_coordinates)):
+                        if secondary_x_coordinates[i] > size[1] or secondary_x_coordinates[i] < 0:
+                           must_be_delete.append(i)
+                    
+                    for i in range(len(secondary_y_coordinates)):
+                        if secondary_y_coordinates[i] > size[0] or secondary_y_coordinates[i] < 0:
+                           must_be_delete.append(i)
+                    
+                    must_be_delete = list(set(must_be_delete))
+                    np.delete(secondary_x_coordinates,must_be_delete)
+                    np.delete(secondary_y_coordinates,must_be_delete)
+                    augmented_label += line_content[0]
+                    augmented_label += ' '
+                    for i in range(len(secondary_y_coordinates)):
+                        augmented_label += str(secondary_x_coordinates[i])
+                        augmented_label += ' '
+                        augmented_label += str(secondary_y_coordinates[i])
+                        augmented_label += ' '
+                    augmented_label = augmented_label[:len(augmented_label)-1]
+                    augmented_label += '\n'
+                    augmented_label_list.append(augmented_label)
+
 
             return augmented_image,augmented_label_list
 
