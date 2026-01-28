@@ -445,25 +445,59 @@ class augmentor():
                     maximum_x = max(secondary_x_coordinates)
                     maximum_y = max(secondary_y_coordinates)
 
-                    # if (minimum_x < 0 or minimum_y < 0 or maximum_x > 1 or maximum_y > 1) == False:
 
                     new_width,new_height = maximum_x - minimum_x,maximum_y-minimum_y
-                    new_width += 0.01
-                    new_height += 0.01
-                    new_center_x,new_center_y = minimum_x+new_width/2,minimum_y+new_height/2
+                    new_width += parameters.rotation_scale*new_width
+                    new_height += parameters.rotation_scale*new_height
                     
+                    miss_percentage = None
+                    if maximum_x > 1 or maximum_y > 1 or minimum_x < 0 or minimum_y < 0 :
+                        area = new_width * new_height
+                        
+                        if maximum_x > 1:
+                            miss_area = (maximum_x-1) * new_height
+                            maximum_x = 1
+                            if miss_percentage == None:
+                                miss_percentage = miss_area/area
+                            else:
+                                miss_percentage += miss_area/area
+                        if maximum_y > 1:
+                            miss_area = (maximum_y-1) * new_width
+                            maximum_y = 1
+                            if miss_percentage == None:
+                                miss_percentage = miss_area/area
+                            else:
+                                miss_percentage += miss_area/area
+                        if minimum_x < 0 :
+                            miss_area = (0-minimum_x) * new_height
+                            minimum_x = 0
+                            if miss_percentage == None:
+                                miss_percentage = miss_area/area
+                            else:
+                                miss_percentage += miss_area/area
+                        if minimum_y < 0 :
+                            miss_area = (0-minimum_y) * new_width
+                            minimum_y = 0
+                            if miss_percentage == None:
+                                miss_percentage = miss_area/area
+                            else:
+                                miss_percentage += miss_area/area
+                        new_width,new_height = maximum_x - minimum_x,maximum_y-minimum_y
 
-                    augmented_label += line_content[0]
-                    augmented_label += ' '
-                    augmented_label += str(new_center_x)
-                    augmented_label += ' '
-                    augmented_label += str(new_center_y)
-                    augmented_label += ' '
-                    augmented_label += str(new_width)
-                    augmented_label += ' '
-                    augmented_label += str(new_height)
-                    augmented_label += '\n'
-                    augmented_label_list.append(augmented_label)
+                    new_center_x,new_center_y = minimum_x+new_width/2,minimum_y+new_height/2
+
+                    if (miss_percentage == None or miss_percentage < 0.25):
+                        augmented_label += line_content[0]
+                        augmented_label += ' '
+                        augmented_label += str(new_center_x)
+                        augmented_label += ' '
+                        augmented_label += str(new_center_y)
+                        augmented_label += ' '
+                        augmented_label += str(new_width)
+                        augmented_label += ' '
+                        augmented_label += str(new_height)
+                        augmented_label += '\n'
+                        augmented_label_list.append(augmented_label)
 
 
             return augmented_image,augmented_label_list

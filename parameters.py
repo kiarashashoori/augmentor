@@ -4,3 +4,5 @@ active_checkboxs = []
 augmentor_mode = 'sign' 
 augment_process = []
 data_cleaner_paths = ['','']
+
+rotation_scale = 0.1
