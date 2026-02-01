@@ -6,6 +6,18 @@ import numpy as np
 import random
 import parameters
 import threading
+import os
+import logging
+
+logging.basicConfig(format="{asctime} - {levelname} - {message}",
+     style="{",
+     datefmt="%Y-%m-%d %H:%M",
+     level=logging.INFO
+ )
+
+logging.getLogger("kivy").disabled = True
+logging.getLogger("kivy.core").disabled = True
+logging.getLogger("kivy.base").disabled = True
 
 lock = threading.Lock()
 
@@ -43,6 +55,7 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('increase brightness')
+            logging.info('[increase brightness] finised!')
         
         if self.augment_type == 'decrease brightness':
             ###copy and paste the labels###
@@ -66,6 +79,7 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('decrease brightness')
+            logging.info('[decrease brightness] finised!')
 ###################################################################################################
 ###            CONTRAST AUGMENT               ###
 
@@ -91,6 +105,7 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('decrease contrast')
+            logging.info('[decrease contrast] finised!')
 
         if self.augment_type == 'increase contrast':
             ###copy and paste the labels###
@@ -114,6 +129,8 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('increase contrast')
+            logging.info('[increase contrast] finised!')
+
 
 
 ###################################################################################################
@@ -141,6 +158,8 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('decrease saturation')
+            logging.info('[decrease saturation] finised!')
+
 
         if self.augment_type == 'increase saturation':
             ###copy and paste the labels###
@@ -164,6 +183,8 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('increase saturation')
+            logging.info('[increase saturation] finised!')
+
 
 ###################################################################################################
 ###            SALT & PEPPER AUGMENT               ###        
@@ -190,6 +211,8 @@ class augmentor():
                         with lock:
                             parameters.counter += 1
             parameters.finish.remove('salt&pepper')
+            logging.info('[salt&pepper] finised!')
+
 
 
 ###################################################################################################
@@ -215,6 +238,8 @@ class augmentor():
                     with lock:
                             parameters.counter += 1
             parameters.finish.remove('blur')
+            logging.info('[blur] finised!')
+
                     
 ###################################################################################################
 ###            MOTION BLUR AUGMENT               ###   
@@ -239,6 +264,8 @@ class augmentor():
                     with lock:
                             parameters.counter += 1
             parameters.finish.remove('vertical motion blur')
+            logging.info('[vertical motion blur] finised!')
+
 
         if self.augment_type == 'horizontal motion blur':
             ###copy and paste the labels###
@@ -260,6 +287,8 @@ class augmentor():
                     with lock:
                             parameters.counter += 1
             parameters.finish.remove('horizontal motion blur')
+            logging.info('[horizontal motion blur] finised!')
+
             
 
 ###################################################################################################
@@ -285,6 +314,8 @@ class augmentor():
                     with lock:
                             parameters.counter += 1
             parameters.finish.remove('flipped')
+            logging.info('[flipped] finised!')
+
 
 ###################################################################################################
 ###            ROTATE AUGMENT               ###   
@@ -309,6 +340,8 @@ class augmentor():
                     with lock:
                             parameters.counter += 1
             parameters.finish.remove('rotate')
+            logging.info('[rotate] finised!')
+
 
 
 

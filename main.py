@@ -1,3 +1,15 @@
+import os
+import logging
+
+logging.basicConfig(format="{asctime} - {levelname} - {message}",
+     style="{",
+     datefmt="%Y-%m-%d %H:%M",
+     level=logging.INFO
+ )
+
+logging.getLogger("kivy").disabled = True
+logging.getLogger("kivy.core").disabled = True
+logging.getLogger("kivy.base").disabled = True
 from kivy.app import App
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
@@ -27,7 +39,13 @@ import threading
 
 import parameters
 
-import os
+
+logging.basicConfig(format="{asctime} - {levelname} - {message}",
+     style="{",
+     datefmt="%Y-%m-%d %H:%M",
+     level=logging.INFO
+ )
+
     
 tb_values = parameters.path_values
 data_cleaner_paths = parameters.data_cleaner_paths
@@ -51,9 +69,11 @@ class appSelectorApp(App):
         return floatlayout
     def btn_clicked(self,instance):
         if instance.text == "Augmentor":
+            logging.info('Augmentor selected')
             self.stop()
             augmentorPathBrowserApp().run()
         elif instance.text == "Data cleaner":
+            logging.info('Data cleaner selected')
             self.stop()
             dataCleanerPathBrowserApp().run()
         elif instance.text == "Data analysis":
@@ -161,13 +181,15 @@ class dataCleanerPathBrowserApp(App):
                 parameters.data_cleaner_paths[0] = filechooser.selection[0]
                 data_cleaner_paths = parameters.data_cleaner_paths
                 self.img_tb.text = parameters.data_cleaner_paths[0]
+                logging.info(f"DATACLEANER : {parameters.data_cleaner_paths[0]} selected for image path")
             elif id == 'label':
                 parameters.data_cleaner_paths[1] = filechooser.selection[0]
                 data_cleaner_paths = parameters.data_cleaner_paths
                 self.label_tb.text = parameters.data_cleaner_paths[1]
+                logging.info(f"DATACLEANER : {parameters.data_cleaner_paths[1]} selected for label path")
             self.close_popup()
         else:
-            print("No path selected")
+            logging.info(f"DATACLEANER : no path selected")
     
     def close_popup(self, *args):
         """Close the popup"""
@@ -177,6 +199,7 @@ class dataCleanerPathBrowserApp(App):
     def dataCleanerProcess(self):
         label_filenames = []
         image_filenames = []
+        logging.info(f'DATACLEANER: Data cleaning in progress...')
         
         label_path = os.listdir(parameters.data_cleaner_paths[1])
         for filename in label_path:
@@ -194,10 +217,11 @@ class dataCleanerPathBrowserApp(App):
                 path = os.path.join(parameters.data_cleaner_paths[0],imagefile)
                 path += '.jpg'
                 os.remove(path)
+                logging.info(f'DATACLEANER: {path} removed!')
             
-            print(f'{i}/{len(image_filenames)}')
             i += 1
         
+        logging.info(f'DATACLEANER: Your data is now clean.')
         self.stop()
         appSelectorApp().run()
 
@@ -338,18 +362,22 @@ class augmentorPathBrowserApp(App):
                 parameters.path_values[0] = filechooser.selection[0]
                 tb_values = parameters.path_values
                 self.input_img_tb.text = parameters.path_values[0]
+                logging.info(f'AUGMENTOR : { parameters.path_values[0]} selected for input image path')
             elif id == 'input label':
                 parameters.path_values[1] = filechooser.selection[0]
                 tb_values = parameters.path_values
                 self.input_label_tb.text = parameters.path_values[1]
+                logging.info(f'AUGMENTOR : { parameters.path_values[1]} selected for input label path')
             elif id == 'output image':
                 parameters.path_values[2] = filechooser.selection[0]
                 tb_values = parameters.path_values
                 self.output_img_tb.text = parameters.path_values[2]
+                logging.info(f'AUGMENTOR : { parameters.path_values[2]} selected for output image path')
             elif id == 'output label':
                 parameters.path_values[3] = filechooser.selection[0]
                 tb_values = parameters.path_values
                 self.output_label_tb.text = parameters.path_values[3]
+                logging.info(f'AUGMENTOR : { parameters.path_values[3]} selected for output label path')
             self.close_popup()
         else:
             print("No path selected")
@@ -404,8 +432,11 @@ class augmentorModeSelectorApp(App):
             parameters.augmentor_mode = checkbox.id
     def clicked(self,_):
         if parameters.augmentor_mode != None:
+            logging.info(f'AUGMENTOR:augmentor is working for {parameters.augmentor_mode}.')
             self.stop()
             augmentorSpeedApp().run()
+        else:
+            logging.info(f'AUGMENTOR: Select one mode!')
 
 class augmentorSpeedApp(App):
     def on_start(self):
@@ -504,7 +535,8 @@ class augmentorSpeedApp(App):
                 self.joke_lbl.texture_update()
                 
     def clicked(self,_):
-        if parameters.augmentor_mode != None:
+        if parameters.threads_num != -1:
+            logging.info(f"AUGMENTOR: augmentor will work with '{parameters.threads_num}' threads!")
             self.stop()
             augmentSelectorApp().run()
 
@@ -763,6 +795,9 @@ class augmentViewerApp(App):
 
         if (parameters.active_checkboxs[0] == 'rotate'):
             self.rotate_angle = int(self.threshold.value)
+        
+        logging.info(f"AUGMENTOR:Your setting for '{parameters.active_checkboxs[0]}' changed!")
+        
 
         augmentViewerApp.create_sample(self)
         self.image.reload()
@@ -800,12 +835,16 @@ class augmentViewerApp(App):
         if (parameters.active_checkboxs[0] == 'rotate'):
             parameters.augment_process.append(('rotate',1,self.rotate_angle))
 
+        logging.info(f"AUGMENTOR:Your setting for '{parameters.active_checkboxs[0]}' saved!")
+
         if (len(parameters.active_checkboxs) > 1):
             parameters.active_checkboxs.pop(0)
             self.screen_layout.clear_widgets()
             augmentViewerApp().stop()
             augmentViewerApp().run()
         else :
+            logging.info(f"AUGMENTOR: Augmentation in progress...")
+
             augmentProcessApp.calculateAugmentedImagesQuantity()
             self.stop()
             augmentProcessApp().run()
@@ -846,9 +885,10 @@ class augmentViewerApp(App):
             sample_img = augmentor.flippedAugmentor(img,None,'sample')
         if (parameters.active_checkboxs[0] == 'rotate'):
             sample_img = augmentor.rotateAugmentor(img,None,self.rotate_angle,'sample')
-            
+        
+        logging.info(f"AUGMENTOR:Showing sample image for '{parameters.active_checkboxs[0]}'")
         cv2.imwrite("cache/output_img.jpg",sample_img)
-              
+
 class augmentProcessApp(App):
    
     def on_start(self):
@@ -931,6 +971,7 @@ class finitoApp(App):
         Window.minimum_height = 800
         
     def build(self):
+        logging.info("AUGMENTOR: Augmentation process completed successfully.")
         auriga_image_layout = AnchorLayout(anchor_x='center', anchor_y='center')
         auriga_image = Image(source = 'Auriga.png',size_hint = (None,None),size=(400,400))
         auriga_image_layout.add_widget(auriga_image)
