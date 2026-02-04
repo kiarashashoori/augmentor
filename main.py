@@ -590,7 +590,6 @@ class augmentSelectorApp(App):
             parameters.active_checkboxs.remove(checkbox.id)
     
     def clicked(self,instance):
-        # print(parameters.active_checkboxs)
         if (len(parameters.active_checkboxs) >0):
             self.stop()
             augmentViewerApp().run()
@@ -633,6 +632,9 @@ class augmentViewerApp(App):
         self.sunlight_intensity = 80
 
         self.b = 50
+
+        self.shadow_strength = 80
+        self.shadow_blur = 11
 
         self.i = 0
         possible_images = os.listdir(parameters.path_values[0])
@@ -720,25 +722,34 @@ class augmentViewerApp(App):
                                     size_hint=(None, None), width=600, height=40,pos=(200,100))
         
         if (parameters.active_checkboxs[0] == 'sunlight'):
-            numlbl = Label(text = 'num',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,120))
+            numlbl = Label(text = 'num',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=(110,120))
             self.threshold_sunlight_num = Slider(min=1, max=7, value=self.sunlight_nums,
                                             size_hint=(None, None), width=600, height=40,pos=(200,150))
-            intensitylbl = Label(text = 'intensity',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,70))
+            intensitylbl = Label(text = 'intensity',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=(110,70))
             self.threshold_sunlight_intensity = Slider(min=0, max=100, value=self.sunlight_intensity,
                                                 size_hint=(None, None), width=600, height=40,pos=(200,100))
-            blurlbl = Label(text = 'blur',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,20))
+            blurlbl = Label(text = 'blur',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=(110,20))
             self.threshold_sunlight_blur = Slider(min=3, max=91, value=self.sunlight_blur,
                                                 size_hint=(None, None), width=600, height=40,pos=(200,50))
+        
+        if (parameters.active_checkboxs[0] == 'shadow'):
+            blurlbl = Label(text = 'blur',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,120))
+            self.threshold_shadow_blur = Slider(min=3, max=91, value=self.shadow_blur,
+                                            size_hint=(None, None), width=600, height=40,pos=(200,150))
+            strengthlbl = Label(text = 'strength',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=(110,70))
+            self.threshold_shadow_strength = Slider(min=0, max=100, value=self.shadow_strength,
+                                            size_hint=(None, None), width=600, height=40,pos=(200,100))
+            
             
         lbl = Label(text=parameters.active_checkboxs[0],pos=(20,100),size_hint = (None,None))
-        if (parameters.active_checkboxs[0] in ['rotate','vertical motion blur','horizontal motion blur','blur','flipped']) == False:
+        if (parameters.active_checkboxs[0] in ['rotate','vertical motion blur','horizontal motion blur','blur','flipped','shadow']) == False:
             self.times = TextInput(text = '1',size_hint = (None,None),size=("50dp","30dp"),pos=(100,100),
                                         multiline=False,foreground_color=(1,1,1,1),background_normal='',background_color=(0.2,0.2,0.2,1))
         apply_btn = Button(text='apply',size_hint = (None,None),size = ("75dp","40dp"),
                              background_normal='',background_color=(0,0.8,0.3,1),pos=(800,100),on_press = self.apply_clicked)
         
         
-        if parameters.active_checkboxs[0] != 'flipped' and parameters.active_checkboxs[0] != 'sunlight':
+        if parameters.active_checkboxs[0] != 'flipped' and parameters.active_checkboxs[0] != 'sunlight' and parameters.active_checkboxs[0] != 'shadow':
             threshold_layout.add_widget(self.threshold)
         
         if parameters.active_checkboxs[0] == 'sunlight':
@@ -748,9 +759,15 @@ class augmentViewerApp(App):
             threshold_layout.add_widget(self.threshold_sunlight_blur)
             threshold_layout.add_widget(self.threshold_sunlight_intensity)
             threshold_layout.add_widget(self.threshold_sunlight_num)
+        if parameters.active_checkboxs[0] == 'shadow':
+            threshold_layout.add_widget(blurlbl)
+            threshold_layout.add_widget(strengthlbl)
+            threshold_layout.add_widget(self.threshold_shadow_blur)
+            threshold_layout.add_widget(self.threshold_shadow_strength)
+
             
         threshold_layout.add_widget(apply_btn)
-        if (parameters.active_checkboxs[0] in ['rotate','vertical motion blur','horizontal motion blur','blur','flipped']) == False:
+        if (parameters.active_checkboxs[0] in ['rotate','vertical motion blur','horizontal motion blur','blur','flipped','shadow']) == False:
             threshold_layout.add_widget(self.times)
         threshold_layout.add_widget(lbl)
 
@@ -830,6 +847,13 @@ class augmentViewerApp(App):
             self.sunlight_intensity = int(self.threshold_sunlight_intensity.value)
             self.sunlight_nums = int(self.threshold_sunlight_num.value)
         
+        if (parameters.active_checkboxs[0] == 'shadow'):
+            val = int(self.threshold_shadow_blur.value)
+            if (val % 2 == 0):
+                val -= 1
+            self.shadow_blur = val
+            self.shadow_strength = int(self.threshold_shadow_strength.value)
+        
         logging.info(f"AUGMENTOR:Your setting for '{parameters.active_checkboxs[0]}' changed!")
         
 
@@ -872,6 +896,8 @@ class augmentViewerApp(App):
         if (parameters.active_checkboxs[0] == 'sunlight'):
             parameters.augment_process.append(('sunlight',int(self.times.text),
                                                (self.sunlight_blur,self.sunlight_intensity/100,self.sunlight_nums)))
+        if (parameters.active_checkboxs[0] == 'shadow'):
+            parameters.augment_process.append(('shadow',1,(self.shadow_blur,self.shadow_strength/100)))
 
         logging.info(f"AUGMENTOR:Your setting for '{parameters.active_checkboxs[0]}' saved!")
 
@@ -925,8 +951,16 @@ class augmentViewerApp(App):
             sample_img = augmentor.rotateAugmentor(img,None,self.rotate_angle,'sample')
         
         if (parameters.active_checkboxs[0] == 'sunlight'):
-            print('bbb')
             sample_img = augmentor.sunlightAugmentor(img,self.sunlight_nums,self.sunlight_blur,self.sunlight_intensity/100)
+        
+        if (parameters.active_checkboxs[0] == 'shadow'):
+            imageName = self.images[self.i]
+            babooo = imageName[:len(imageName)-4]
+            babooo += '.txt'
+            label_path = os.path.join(parameters.path_values[1],babooo)
+            with open(label_path,'r') as f:
+                lines = f.readlines()
+            sample_img = augmentor.shadowAugmentor(img,lines,self.shadow_blur,self.shadow_strength/100)
             
         
         logging.info(f"AUGMENTOR:Showing sample image for '{parameters.active_checkboxs[0]}'")

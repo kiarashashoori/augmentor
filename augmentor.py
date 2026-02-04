@@ -368,7 +368,34 @@ class augmentor():
                             parameters.counter += 1
             parameters.finish.remove('sunlight')
             logging.info('[sunlight] finised!')
-
+###################################################################################################
+###            SHADOW AUGMENT               ###   
+        if self.augment_type == 'shadow':
+            ###copy and paste the labels###
+            label_filename_list = os.listdir(self.input_label_path)
+            for filename in label_filename_list:
+                if filename.endswith(".txt"):
+                    label_output_filename = "SHA_"+ filename
+                    label_output_path = os.path.join(self.output_label_path , label_output_filename)
+                    shutil.copy2(os.path.join(self.input_label_path,filename),label_output_path)
+            ###augment the image###
+            img_filename_list = os.listdir(self.input_img_path)
+            for filename in img_filename_list:
+                if filename.endswith(".jpg"):
+                    babooo = filename[:len(filename)-4]
+                    babooo += '.txt'
+                    label_path = os.path.join(parameters.path_values[1],babooo)
+                    with open(label_path,'r') as f:
+                        lines = f.readlines()
+                    img = cv2.imread(os.path.join(self.input_img_path,filename))
+                    img_output_filename = "SHA_" + filename
+                    img_output_path = os.path.join(self.output_img_path,img_output_filename)
+                    augmented_image = augmentor.shadowAugmentor(img,lines,threshold[0],threshold[1])
+                    cv2.imwrite(img_output_path,augmented_image)   
+                    with lock:
+                        parameters.counter += 1
+            parameters.finish.remove('shadow')
+            logging.info('[shadow] finised!')
 
     @staticmethod
     def brightnessIncreasedAugmentor(img,brightness_threshold,mode):
@@ -676,47 +703,73 @@ class augmentor():
         return np.clip(output, 0, 255).astype(np.uint8)
 
     @staticmethod
-    def shadowAugmentor(image,num_shadows,blur,strength,mode):
-        H, W = image.shape[:2]
-        output = image.copy().astype(np.float32)
+    def shadowAugmentor(image,label_content,blur,strength):
+        if (parameters.augmentor_mode == 'line'):
+            H, W = image.shape[:2]
+            base = image.copy().astype(np.float32)
+            output = base.copy()
+            for line in label_content:
+                line_content = line.split()
+                sum_x , sum_y = 0,0
+                for i in range(len(line_content)):
+                    if i % 2 == 0 and i != 0:
+                        sum_y += float(line_content[i])
+                    if i % 2 == 1:
+                        sum_x += float(line_content[i])
+                
+                avgx = int(sum_x/((len(line_content) -1)/2))
+                avgy = int(sum_y/((len(line_content) -1)/2))
+
+                op = random.choices([-1,1])
+                if (op[0] > 0):
+                    pt1 = (np.random.randint(int(avgx + op[0]*70),int(avgx + op[0]*150)),
+                            np.random.randint(int(avgy-50),int(avgy+50)))
+                else:
+                    pt1 = (np.random.randint(int(avgx + op[0]*150),int(avgx + op[0]*70)),
+                            np.random.randint(int(avgy-50),int(avgy+50)))
+                xx = np.random.randint(50,150)
+                yy = np.random.randint(30,150)
+                pt2 = (pt1[0] + op[0]*xx*-1,pt1[1] - yy)
+                xx = np.random.randint(50,150)
+                yy = np.random.randint(30,150)
+                pt3 = (pt1[0] + op[0]*xx*-1,pt1[1]+yy)
+                pts = np.array([pt1,pt2,pt3], dtype=np.int32)
+
+                mask = np.zeros((H, W), dtype=np.float32)
+
+                cv2.fillPoly(mask, [pts], 1.0)
+
+                if blur > 0:
+                    mask = cv2.GaussianBlur(mask, (blur, blur), 0)
+
+                shadow_factor = 1.0 - strength
+
+                shadowed = base * (1 - mask + mask * shadow_factor)[:, :, None]
+
+                output = np.minimum(output, shadowed)
+            return np.clip(output, 0, 255).astype(np.uint8)
+        
 
         # create mask
-        mask = np.zeros((H, W), dtype=np.float32)
-        for _ in num_shadows:
-            pt1 = (np.random.randint(int((image.shape[1]/10)*2),int((image.shape[1]/10)*8)),
-                   np.random.randint(image.shape[0]//2,image.shape[0]))
-            pt2 = (np.random.randint(pt1[0]-200,pt1[0]-50),
-                   np.random.randint(pt1[1]-200,pt1[1]+200))
-            pt3 = (np.random.randint(pt1[0]+50,pt1[0]+200),
-                   np.random.randint(pt1[1]-200,pt1[1]+200))
-            pts = np.array([pt1,pt2,pt3], dtype=np.int32)
-            cv2.fillPoly(mask, pts, 1.0)
-
-            # optional blur for soft shadow edges
-            if blur > 0:
-                mask = cv2.GaussianBlur(mask, (blur, blur), 0)
-
-            # apply shadow
-            shadow_factor = 1.0 - strength
-            for c in range(3):
-                output[:, :, c] *= (1 - mask + mask * shadow_factor)
-
-        return np.clip(output, 0, 255).astype(np.uint8)
-
-
-
         
-class shadowAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
-        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+        # for _ in num_shadows:
+        #     pt1 = (np.random.randint(int((image.shape[1]/10)*2),int((image.shape[1]/10)*8)),
+        #            np.random.randint(image.shape[0]//2,image.shape[0]))
+        #     pt2 = (np.random.randint(pt1[0]-200,pt1[0]-50),
+        #            np.random.randint(pt1[1]-200,pt1[1]+200))
+        #     pt3 = (np.random.randint(pt1[0]+50,pt1[0]+200),
+        #            np.random.randint(pt1[1]-200,pt1[1]+200))
+        #     pts = np.array([pt1,pt2,pt3], dtype=np.int32)
+        #     cv2.fillPoly(mask, pts, 1.0)
 
-class sunlightAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
-        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+        #     # optional blur for soft shadow edges
+        #     if blur > 0:
+        #         mask = cv2.GaussianBlur(mask, (blur, blur), 0)
 
-class rotateAugmentor(augmentor):
-    def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
-        super().__init__(input_img_path, input_label_path, output_img_path, output_label_path, times)
+        #     # apply shadow
+        #     shadow_factor = 1.0 - strength
+        #     for c in range(3):
+        #         output[:, :, c] *= (1 - mask + mask * shadow_factor)
 
 class hueAugmentor (augmentor):
     def __init__(self, input_img_path, input_label_path, output_img_path, output_label_path, times):
