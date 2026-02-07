@@ -63,7 +63,9 @@ python main.py
 - Augment – apply various image augmentations
 - Data Cleaner – remove images without proper labels
 - Data Analysis – explore dataset (coming soon)
+
 3.Configure your dataset paths and augmentation parameters.
+
 4.Start the process and watch the progress bar for real-time updates.
 
 ## Contributing
