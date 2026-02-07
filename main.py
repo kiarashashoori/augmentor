@@ -620,7 +620,8 @@ class augmentViewerApp(App):
         self.increase_saturation_threshold = 25
         self.decrease_saturation_threshold = 25
 
-        self.salt_pepper_threshold = 50
+        self.salt_threshold = 50
+        self.pepper_threshold = 50
 
         self.blur_threshold = 5
 
@@ -709,8 +710,13 @@ class augmentViewerApp(App):
                                     size_hint=(None, None), width=600, height=40,pos=(200,100))
                 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            self.threshold = Slider(min=0, max=200, value=self.salt_pepper_threshold,
+            saltlbl = Label(text = 'salt',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,120))
+            self.threshold_salt = Slider(min=11, max=200, value=self.salt_threshold,
+                                    size_hint=(None, None), width=600, height=40,pos=(200,150))
+            pepperlbl = Label(text = 'pepper',size_hint = (None,None),size = ("150dp", "100dp"), halign='left',valign='middle',pos=  (110,70))
+            self.threshold_pepper = Slider(min=11, max=200, value=self.pepper_threshold,
                                     size_hint=(None, None), width=600, height=40,pos=(200,100))
+            
             
         if (parameters.active_checkboxs[0] == 'blur'):
             self.threshold = Slider(min=0, max=33, value=self.blur_threshold,
@@ -780,9 +786,13 @@ class augmentViewerApp(App):
         apply_btn = Button(text='apply',size_hint = (None,None),size = ("75dp","40dp"),
                              background_normal='',background_color=(0,0.8,0.3,1),pos=(800,100),on_press = self.apply_clicked)
         
-        
-        if parameters.active_checkboxs[0] != 'flipped' and parameters.active_checkboxs[0] != 'sunlight' and parameters.active_checkboxs[0] != 'shadow':
+        if (parameters.active_checkboxs[0] in ['flipped','sunlight','shadow','salt&pepper']) == False:
             threshold_layout.add_widget(self.threshold)
+        if (parameters.active_checkboxs[0] == 'salt&pepper'):
+            threshold_layout.add_widget(self.threshold_salt)
+            threshold_layout.add_widget(self.threshold_pepper)
+            threshold_layout.add_widget(pepperlbl)
+            threshold_layout.add_widget(saltlbl)
         
         if parameters.active_checkboxs[0] == 'sunlight':
             threshold_layout.add_widget(blurlbl)
@@ -860,7 +870,8 @@ class augmentViewerApp(App):
             self.decrease_saturation_threshold = int(self.threshold.value)
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            self.salt_pepper_threshold = int(self.threshold.value)
+            self.salt_threshold = int(self.threshold_salt.value)
+            self.pepper_threshold = int(self.threshold_pepper.value)
 
         if (parameters.active_checkboxs[0] == 'blur'):
             val = int(self.threshold.value)
@@ -923,7 +934,7 @@ class augmentViewerApp(App):
             parameters.augment_process.append(('decrease saturation',int(self.times.text),self.decrease_saturation_threshold))
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            parameters.augment_process.append(('salt&pepper',int(self.times.text),self.salt_pepper_threshold))
+            parameters.augment_process.append(('salt&pepper',int(self.times.text),(self.salt_threshold,self.pepper_threshold)))
         
         if (parameters.active_checkboxs[0] == 'blur'):
             parameters.augment_process.append(('blur',1,self.blur_threshold))
@@ -984,7 +995,7 @@ class augmentViewerApp(App):
             sample_img = augmentor.saturationDecreasedAugmentor(img,self.decrease_saturation_threshold,'sample')
 
         if (parameters.active_checkboxs[0] == 'salt&pepper'):
-            sample_img = augmentor.saltPepperAugmentor(img,self.salt_pepper_threshold,'sample')
+            sample_img = augmentor.saltPepperAugmentor(img,(self.salt_threshold,self.pepper_threshold),'sample')
         
         if (parameters.active_checkboxs[0] == 'blur'):
             sample_img = augmentor.blurAugmentor(img,self.blur_threshold,'sample')

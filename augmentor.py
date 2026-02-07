@@ -487,13 +487,23 @@ class augmentor():
     @staticmethod
     def saltPepperAugmentor(img,noise_level,mode):
         if mode == 'augment':
-            noise = random.randint(10,noise_level)  
+            if noise_level[0] <= 100:
+                noise_salt = random.randint(10,noise_level[0])  
+            else :
+                noise_salt = random.randint(50,noise_level[0])  
+            if noise_level[1] <= 100:
+                noise_pepper = random.randint(10,noise_level[1])  
+            else :
+                noise_pepper = random.randint(50,noise_level[1])  
+
         elif mode == 'sample':
-            noise = noise_level
+            noise_salt = noise_level[0]
+            noise_pepper = noise_level[1]
         augmented_image = img
-        noise /= 1000
-        salt_prob = noise / 2
-        pepper_prob = noise / 2
+        noise_salt /= 1000
+        noise_pepper /= 1000
+        salt_prob = noise_salt / 2
+        pepper_prob = noise_pepper / 2
         salt_mask = np.random.random(img.shape[:2]) < salt_prob
         augmented_image[salt_mask] = 255
         pepper_mask = np.random.random(img.shape[:2]) < pepper_prob
